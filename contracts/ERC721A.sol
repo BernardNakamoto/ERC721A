@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.0;
 
+import 'hardhat/console.sol';
+
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
@@ -36,7 +38,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         uint128 numberMinted;
     }
 
-    uint256 internal currentIndex = 0;
+    uint256 internal currentIndex = 1;
 
     // Token name
     string private _name;
@@ -66,7 +68,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
      * @dev See {IERC721Enumerable-totalSupply}.
      */
     function totalSupply() public view override returns (uint256) {
-        return currentIndex;
+        return currentIndex - 1;
     }
 
     /**
@@ -87,7 +89,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         uint256 numMintedSoFar = totalSupply();
         uint256 tokenIdsIdx = 0;
         address currOwnershipAddr = address(0);
-        for (uint256 i = 0; i < numMintedSoFar; i++) {
+        for (uint256 i = 1; i <= numMintedSoFar; i++) {
             TokenOwnership memory ownership = _ownerships[i];
             if (ownership.addr != address(0)) {
                 currOwnershipAddr = ownership.addr;
@@ -128,7 +130,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
 
     function ownershipOf(uint256 tokenId) internal view returns (TokenOwnership memory) {
         require(_exists(tokenId), 'ERC721A: owner query for nonexistent token');
-
+        // require(tokenId > 0, 'Token ID negative');
         for (uint256 curr = tokenId; ; curr--) {
             TokenOwnership memory ownership = _ownerships[curr];
             if (ownership.addr != address(0)) {
@@ -295,7 +297,6 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         require(quantity > 0, 'ERC721A: quantity must be greater 0');
 
         _beforeTokenTransfers(address(0), to, startTokenId, quantity);
-
         AddressData memory addressData = _addressData[to];
         _addressData[to] = AddressData(
             addressData.balance + uint128(quantity),
@@ -305,7 +306,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
 
         uint256 updatedIndex = startTokenId;
 
-        for (uint256 i = 0; i < quantity; i++) {
+        for (uint256 i = 1; i <= quantity; i++) {
             emit Transfer(address(0), to, updatedIndex);
             require(
                 _checkOnERC721Received(address(0), to, updatedIndex, _data),

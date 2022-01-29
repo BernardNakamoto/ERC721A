@@ -34,14 +34,19 @@ describe('ERC721A', function () {
 
     describe('exists', async function () {
       it('verifies valid tokens', async function () {
-        for (let tokenId = 0; tokenId < 6; tokenId++) {
+        for (let tokenId = 1; tokenId <= 6; tokenId++) {
           const exists = await this.erc721a.exists(tokenId);
+
+          console.log('CHECK TOKEN EXISTS');
+          console.log(tokenId);
+          console.log(exists);
+          console.log('CHECK TOKEN EXISTS');
           expect(exists).to.be.true;
         }
       });
 
       it('verifies invalid tokens', async function () {
-        const exists = await this.erc721a.exists(6);
+        const exists = await this.erc721a.exists(7);
         expect(exists).to.be.false;
       });
     });
@@ -72,9 +77,9 @@ describe('ERC721A', function () {
 
     describe('ownerOf', async function () {
       it('returns the right owner', async function () {
-        expect(await this.erc721a.ownerOf(0)).to.equal(this.addr1.address);
-        expect(await this.erc721a.ownerOf(1)).to.equal(this.addr2.address);
-        expect(await this.erc721a.ownerOf(5)).to.equal(this.addr3.address);
+        expect(await this.erc721a.ownerOf(1)).to.equal(this.addr1.address);
+        expect(await this.erc721a.ownerOf(2)).to.equal(this.addr2.address);
+        expect(await this.erc721a.ownerOf(6)).to.equal(this.addr3.address);
       });
 
       it('reverts for an invalid token', async function () {
@@ -83,8 +88,8 @@ describe('ERC721A', function () {
     });
 
     describe('approve', async function () {
-      const tokenId = 0;
-      const tokenId2 = 1;
+      const tokenId = 1;
+      const tokenId2 = 2;
 
       it('sets approval for the target address', async function () {
         await this.erc721a.connect(this.addr1).approve(this.addr2.address, tokenId);
@@ -127,7 +132,7 @@ describe('ERC721A', function () {
 
     context('test transfer functionality', function () {
       const testSuccessfulTransfer = function (transferFn) {
-        const tokenId = 1;
+        const tokenId = 2;
         let from;
         let to;
 
@@ -161,8 +166,8 @@ describe('ERC721A', function () {
         });
 
         it('adjusts owners tokens by index', async function () {
-          expect(await this.erc721a.tokenOfOwnerByIndex(to, 0)).to.be.equal(tokenId);
-          expect(await this.erc721a.tokenOfOwnerByIndex(from, 0)).to.be.not.equal(tokenId);
+          expect(await this.erc721a.tokenOfOwnerByIndex(to, 1)).to.be.equal(tokenId);
+          expect(await this.erc721a.tokenOfOwnerByIndex(from, 1)).to.be.not.equal(tokenId);
         });
       };
 
@@ -230,20 +235,20 @@ describe('ERC721A', function () {
     describe('safeMint', function () {
       it('successfully mints a single token', async function () {
         const mintTx = await this.erc721a['safeMint(address,uint256)'](this.receiver.address, 1);
-        await expect(mintTx).to.emit(this.erc721a, 'Transfer').withArgs(ZERO_ADDRESS, this.receiver.address, 0);
+        await expect(mintTx).to.emit(this.erc721a, 'Transfer').withArgs(ZERO_ADDRESS, this.receiver.address, 1);
         await expect(mintTx)
           .to.emit(this.receiver, 'Received')
-          .withArgs(this.owner.address, ZERO_ADDRESS, 0, '0x', GAS_MAGIC_VALUE);
-        expect(await this.erc721a.ownerOf(0)).to.equal(this.receiver.address);
+          .withArgs(this.owner.address, ZERO_ADDRESS, 1, '0x', GAS_MAGIC_VALUE);
+        expect(await this.erc721a.ownerOf(1)).to.equal(this.receiver.address);
       });
 
       it('successfully mints multiple tokens', async function () {
         const mintTx = await this.erc721a['safeMint(address,uint256)'](this.receiver.address, 5);
-        for (let tokenId = 0; tokenId < 5; tokenId++) {
+        for (let tokenId = 1; tokenId <= 5; tokenId++) {
           await expect(mintTx).to.emit(this.erc721a, 'Transfer').withArgs(ZERO_ADDRESS, this.receiver.address, tokenId);
           await expect(mintTx)
             .to.emit(this.receiver, 'Received')
-            .withArgs(this.owner.address, ZERO_ADDRESS, 0, '0x', GAS_MAGIC_VALUE);
+            .withArgs(this.owner.address, ZERO_ADDRESS, 1, '0x', GAS_MAGIC_VALUE);
           expect(await this.erc721a.ownerOf(tokenId)).to.equal(this.receiver.address);
         }
       });
@@ -255,7 +260,7 @@ describe('ERC721A', function () {
       });
 
       it('requires quantity to be greater 0', async function () {
-        await expect(this.erc721a['safeMint(address,uint256)'](this.owner.address, 0)).to.be.revertedWith(
+        await expect(this.erc721a['safeMint(address,uint256)'](this.owner.address, 1)).to.be.revertedWith(
           'ERC721A: quantity must be greater 0'
         );
       });
